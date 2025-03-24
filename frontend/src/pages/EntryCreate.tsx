@@ -69,8 +69,9 @@ const EntryCreate: React.FC = () => {
               fullWidth
             />
             <FormControl fullWidth>
-              <InputLabel>Mood</InputLabel>
+              <InputLabel id="mood-label">Mood</InputLabel>
               <Select
+                labelId="mood-label"
                 value={mood}
                 label="Mood"
                 onChange={(e) => setMood(e.target.value)}
@@ -110,6 +111,7 @@ const EntryCreate: React.FC = () => {
                     key={tag.id}
                     label={tag.name}
                     onDelete={() => handleDeleteTag(tag)}
+                    aria-label={`delete ${tag.name}`}
                   />
                 ))}
               </Box>

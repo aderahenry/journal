@@ -37,9 +37,9 @@ const Layout: React.FC = () => {
   };
 
   const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
-    { text: 'New Entry', icon: <EditIcon />, path: '/entries/new' },
+    { text: 'Entries', icon: <EditIcon />, path: '/entries' },
     { text: 'Statistics', icon: <BarChartIcon />, path: '/stats' },
+    { text: 'Settings', icon: <DashboardIcon />, path: '/settings' },
   ];
 
   const drawer = (
@@ -56,12 +56,13 @@ const Layout: React.FC = () => {
             component={RouterLink}
             to={item.path}
             onClick={() => isMobile && setMobileOpen(false)}
+            aria-label={item.text}
           >
             <ListItemIcon>{item.icon}</ListItemIcon>
             <ListItemText primary={item.text} />
           </ListItemButton>
         ))}
-        <ListItemButton onClick={logout}>
+        <ListItemButton onClick={logout} aria-label="Logout">
           <ListItemIcon>
             <LogoutIcon />
           </ListItemIcon>
@@ -85,16 +86,13 @@ const Layout: React.FC = () => {
         <Toolbar>
           <IconButton
             color="inherit"
-            aria-label="open drawer"
+            aria-label="menu"
             edge="start"
             onClick={handleDrawerToggle}
             sx={{ mr: 2, display: { sm: 'none' } }}
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Journal App
-          </Typography>
         </Toolbar>
       </AppBar>
       <Box
@@ -107,12 +105,13 @@ const Layout: React.FC = () => {
             open={mobileOpen}
             onClose={handleDrawerToggle}
             ModalProps={{
-              keepMounted: true, // Better open performance on mobile.
+              keepMounted: true,
             }}
             sx={{
               display: { xs: 'block', sm: 'none' },
               '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, borderRadius: 0 },
             }}
+            role="presentation"
           >
             {drawer}
           </Drawer>
@@ -124,6 +123,7 @@ const Layout: React.FC = () => {
               '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, borderRadius: 0 },
             }}
             open
+            role="presentation"
           >
             {drawer}
           </Drawer>

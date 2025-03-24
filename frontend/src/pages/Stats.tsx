@@ -65,12 +65,12 @@ const Stats: React.FC = () => {
   }
 
   // Transform the data for the charts
-  const moodData = stats.moodDistribution.map(item => ({
+  const moodData = stats.moodDistribution?.map(item => ({
     name: item.mood,
     value: item.count
   }));
 
-  const categoryData = stats.categoryDistribution.map(item => ({
+  const categoryData = stats.categoryDistribution?.map(item => ({
     name: item.category,
     value: item.count
   }));
