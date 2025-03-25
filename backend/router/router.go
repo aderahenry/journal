@@ -13,12 +13,14 @@ import (
 func SetupRouter(
 	authService *services.AuthService,
 	journalService *services.JournalService,
+	categoryService *services.CategoryService,
 ) *mux.Router {
 	r := mux.NewRouter()
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	journalHandler := handlers.NewJournalHandler(journalService)
+	categoryHandler := handlers.NewCategoryHandler(categoryService)
 
 	// Apply middleware
 	r.Use(middleware.CORSMiddleware())
@@ -35,6 +37,10 @@ func SetupRouter(
 	r.HandleFunc("/api/entries/{id}", journalHandler.GetEntry).Methods("GET")
 	r.HandleFunc("/api/entries/{id}", journalHandler.UpdateEntry).Methods("PUT")
 	r.HandleFunc("/api/entries/{id}", journalHandler.DeleteEntry).Methods("DELETE")
+
+	// Category routes
+	r.HandleFunc("/api/categories", categoryHandler.GetCategories).Methods("GET")
+	r.HandleFunc("/api/categories/{id}", categoryHandler.GetCategory).Methods("GET")
 
 	// Health check
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {

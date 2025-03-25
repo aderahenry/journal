@@ -7,6 +7,12 @@ export interface Tag {
   name: string;
 }
 
+export interface Category {
+  id: number;
+  name: string;
+  color: string;
+}
+
 export interface Entry {
   id: number;
   title: string;
@@ -34,7 +40,7 @@ interface EntryStats {
   }>;
 }
 
-type TagTypes = 'Entry' | 'Stats';
+type TagTypes = 'Entry' | 'Stats' | 'Category';
 
 type Api = ReturnType<typeof createApi>;
 
@@ -50,7 +56,7 @@ export const api = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Entry', 'Stats'] as const,
+  tagTypes: ['Entry', 'Stats', 'Category'] as const,
   endpoints: (builder: EndpointBuilder<ReturnType<typeof fetchBaseQuery>, TagTypes, never>) => ({
     login: builder.mutation<{ token: string }, { email: string; password: string }>({
       query: (credentials) => ({
@@ -112,6 +118,10 @@ export const api = createApi({
       query: () => 'entries/stats',
       providesTags: [{ type: 'Stats' }],
     }),
+    getCategories: builder.query<Category[], void>({
+      query: () => 'categories',
+      providesTags: [{ type: 'Category' }],
+    }),
   }),
 });
 
@@ -124,4 +134,5 @@ export const {
   useUpdateEntryMutation,
   useDeleteEntryMutation,
   useGetEntryStatsQuery,
+  useGetCategoriesQuery,
 } = api; 

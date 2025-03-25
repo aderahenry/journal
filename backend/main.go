@@ -29,9 +29,10 @@ func main() {
 	userService := services.NewUserService(database)
 	journalService := services.NewJournalService(database)
 	authService := services.NewAuthService(userService)
+	categoryService := services.NewCategoryService(database)
 
 	// Setup router
-	r := router.SetupRouter(authService, journalService)
+	r := router.SetupRouter(authService, journalService, categoryService)
 
 	// Configure CORS
 	c := cors.New(cors.Options{

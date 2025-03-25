@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, Link as RouterLink } from 'react-router-dom';
+import { Outlet, Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Box,
@@ -23,24 +23,43 @@ import {
   Logout as LogoutIcon,
   Settings,
 } from '@mui/icons-material';
-import { useAuth } from '../hooks/useAuth';
+import { useDispatch } from 'react-redux';
+import { clearToken } from '../store/slices/authSlice';
 
 const drawerWidth = 240;
 
 const Layout: React.FC = () => {
   const theme = useTheme();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const { logout } = useAuth();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
+  const handleLogout = () => {
+    // Clear the token in Redux
+    dispatch(clearToken());
+    // Navigate to login page
+    navigate('/login');
+  };
+
+  // Function to check if a menu item is active
+  const isActive = (path: string): boolean => {
+    if (path === '/') {
+      // Only match exactly for home route
+      return location.pathname === '/';
+    }
+    // For other routes, check if the current path starts with the menu item path
+    return location.pathname.startsWith(path);
+  };
+
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
     { text: 'New Entry', icon: <EditIcon />, path: '/entries/new' },
-    
     { text: 'Statistics', icon: <BarChartIcon />, path: '/stats' },
     { text: 'Settings', icon: <Settings />, path: '/settings' },
   ];
@@ -60,12 +79,25 @@ const Layout: React.FC = () => {
             to={item.path}
             onClick={() => isMobile && setMobileOpen(false)}
             aria-label={item.text}
+            selected={isActive(item.path)}
+            sx={{
+              '&.Mui-selected': {
+                backgroundColor: theme.palette.primary.main + '20', // Add transparency
+                color: theme.palette.primary.main,
+                '&:hover': {
+                  backgroundColor: theme.palette.primary.main + '30',
+                },
+                '& .MuiListItemIcon-root': {
+                  color: theme.palette.primary.main,
+                },
+              },
+            }}
           >
             <ListItemIcon>{item.icon}</ListItemIcon>
             <ListItemText primary={item.text} />
           </ListItemButton>
         ))}
-        <ListItemButton onClick={logout} aria-label="Logout">
+        <ListItemButton onClick={handleLogout} aria-label="Logout">
           <ListItemIcon>
             <LogoutIcon />
           </ListItemIcon>

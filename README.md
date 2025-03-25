@@ -5,6 +5,7 @@ A full-stack journaling application built with React, Material-UI, Go, and MySQL
 ## Features
 
 ### Frontend
+
 - Modern React with TypeScript
 - Material-UI v5 components
 - Redux Toolkit with RTK Query
@@ -13,6 +14,7 @@ A full-stack journaling application built with React, Material-UI, Go, and MySQL
 - Optimistic updates
 
 ### Backend
+
 - Go with Gorilla MUX
 - GORM for database operations
 - JWT authentication
@@ -22,6 +24,7 @@ A full-stack journaling application built with React, Material-UI, Go, and MySQL
 ## System Design Document
 
 ### Architecture Overview
+
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │   React Frontend│     │   Go Backend    │     │    MySQL DB     │
@@ -30,11 +33,13 @@ A full-stack journaling application built with React, Material-UI, Go, and MySQL
 ```
 
 The application follows a three-tier architecture:
+
 1. **Frontend Layer**: React application with TypeScript, handling UI/UX and client-side state management
 2. **Backend Layer**: Go server providing RESTful APIs and business logic
 3. **Data Layer**: MySQL database for persistent storage
 
 ### Data Model Design
+
 ```
 User
 ├── ID (PK)
@@ -76,6 +81,7 @@ Tag
 ```
 
 ### Security Measures
+
 1. **Authentication & Authorization**
    - JWT-based authentication with refresh tokens
    - Role-based access control (RBAC)
@@ -96,11 +102,13 @@ Tag
 ### Scaling Strategy
 
 #### Current Architecture (1K-10K Users)
+
 - Single server deployment
 - Monolithic backend
 - Direct database connections
 
 #### Scaling to 1M+ Users
+
 1. **Horizontal Scaling**
    - Load balancers for frontend and backend
    - Multiple application servers

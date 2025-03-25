@@ -18,6 +18,7 @@ import { useGetEntryQuery, useUpdateEntryMutation } from '../store/api';
 import type { Tag } from '../store/api';
 
 const MOODS = ['Happy', 'Sad', 'Angry', 'Excited', 'Peaceful', 'Neutral', 'Anxious', 'Grateful', 'Frustrated', 'Hopeful'];
+const CATEGORIES = ['Personal', 'Work', 'Ideas', 'Learning', 'Health', 'Travel', 'Finance', 'Family', 'Other'];
 
 const EntryEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -28,6 +29,7 @@ const EntryEdit: React.FC = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [mood, setMood] = useState('');
+  const [categoryId, setCategoryId] = useState<number | null>(null);
   const [tags, setTags] = useState<Tag[]>([]);
   const [newTag, setNewTag] = useState('');
 
@@ -36,6 +38,7 @@ const EntryEdit: React.FC = () => {
       setTitle(entry.title);
       setContent(entry.content);
       setMood(entry.mood || '');
+      setCategoryId(entry.categoryId);
       setTags(entry.tags || []);
     }
   }, [entry]);
@@ -57,6 +60,7 @@ const EntryEdit: React.FC = () => {
           title,
           content,
           mood,
+          categoryId,
           tags: tags.map(tag => tag.name),
         },
       }).unwrap();
@@ -102,6 +106,24 @@ const EntryEdit: React.FC = () => {
                 {MOODS.map((m) => (
                   <MenuItem key={m} value={m}>
                     {m}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel id="category-label">Category</InputLabel>
+              <Select
+                labelId="category-label"
+                value={categoryId === null ? '' : categoryId}
+                label="Category"
+                onChange={(e) => setCategoryId(e.target.value === '' ? null : Number(e.target.value))}
+              >
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                {CATEGORIES.map((category, index) => (
+                  <MenuItem key={index} value={index + 1}>
+                    {category}
                   </MenuItem>
                 ))}
               </Select>

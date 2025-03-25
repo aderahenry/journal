@@ -33,6 +33,26 @@ import {
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
+// Render custom label for pie chart
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }) => {
+  const RADIAN = Math.PI / 180;
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  return (
+    <text 
+      x={x} 
+      y={y} 
+      fill="white" 
+      textAnchor={x > cx ? 'start' : 'end'} 
+      dominantBaseline="central"
+    >
+      {`${name} (${(percent * 100).toFixed(0)}%)`}
+    </text>
+  );
+};
+
 const Stats: React.FC = () => {
   const { data: stats, isLoading, error } = useGetEntryStatsQuery();
 
@@ -64,16 +84,20 @@ const Stats: React.FC = () => {
     );
   }
 
-  // Transform the data for the charts
-  const moodData = stats.moodDistribution?.map(item => ({
-    name: item.mood,
-    value: item.count
-  }));
+  // Transform the data for the charts with fallback to empty arrays if data is missing
+  const moodData = stats.moodDistribution && stats.moodDistribution.length > 0
+    ? stats.moodDistribution.map(item => ({
+        name: item.Mood,
+        value: item.Count
+      }))
+    : [{ name: 'No Data', value: 1 }];
 
-  const categoryData = stats.categoryDistribution?.map(item => ({
-    name: item.category,
-    value: item.count
-  }));
+  const categoryData = stats.categoryDistribution && stats.categoryDistribution.length > 0
+    ? stats.categoryDistribution.map(item => ({
+        name: item.Category || 'Uncategorized',
+        value: item.Count
+      }))
+    : [{ name: 'No Data', value: 1 }];
 
   const StatCard: React.FC<{
     title: string;
@@ -142,7 +166,8 @@ const Stats: React.FC = () => {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    outerRadius={80}
+                    label={renderCustomizedLabel}
+                    outerRadius={120}
                     fill="#8884d8"
                     dataKey="value"
                   >
@@ -150,7 +175,7 @@ const Stats: React.FC = () => {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip formatter={(value) => [`${value} entries`, 'Count']} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -169,9 +194,9 @@ const Stats: React.FC = () => {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis />
-                  <Tooltip />
+                  <Tooltip formatter={(value) => [`${value} entries`, 'Count']} />
                   <Legend />
-                  <Bar dataKey="value" fill="#8884d8" />
+                  <Bar dataKey="value" fill="#8884d8" name="Entries" radius={[5, 5, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </Box>

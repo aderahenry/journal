@@ -18,15 +18,23 @@ CREATE TABLE IF NOT EXISTS users (
 -- Categories table
 CREATE TABLE IF NOT EXISTS categories (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT UNSIGNED NOT NULL,
     name VARCHAR(100) NOT NULL,
-    color VARCHAR(7) DEFAULT '#000000',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_category_per_user (user_id, name)
 );
+
+-- Insert categories if they don't exist
+INSERT IGNORE INTO `categories` (`id`, `name`, `created_at`, `updated_at`) VALUES
+(1, 'Personal', NOW(), NOW()),
+(2, 'Work', NOW(), NOW()),
+(3, 'Ideas', NOW(), NOW()),
+(4, 'Learning', NOW(), NOW()),
+(5, 'Health', NOW(), NOW()),
+(6, 'Travel', NOW(), NOW()),
+(7, 'Finance', NOW(), NOW()),
+(8, 'Family', NOW(), NOW()),
+(9, 'Other', NOW(), NOW());
 
 -- Journal entries table
 CREATE TABLE IF NOT EXISTS journal_entries (
