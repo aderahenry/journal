@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Remove existing node_modules and yarn.lock
-rm -rf node_modules yarn.lock
-
 # Set up Yarn 4.6.0
 corepack enable
 yarn set version 4.6.0
