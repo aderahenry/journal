@@ -14,6 +14,7 @@ func SetupRouter(
 	authService *services.AuthService,
 	journalService *services.JournalService,
 	categoryService *services.CategoryService,
+	userService *services.UserService,
 ) *mux.Router {
 	r := mux.NewRouter()
 
@@ -21,6 +22,7 @@ func SetupRouter(
 	authHandler := handlers.NewAuthHandler(authService)
 	journalHandler := handlers.NewJournalHandler(journalService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
+	userHandler := handlers.NewUserHandler(userService)
 
 	// Apply middleware
 	r.Use(middleware.CORSMiddleware())
@@ -40,7 +42,15 @@ func SetupRouter(
 
 	// Category routes
 	r.HandleFunc("/api/categories", categoryHandler.GetCategories).Methods("GET")
+	r.HandleFunc("/api/categories", categoryHandler.CreateCategory).Methods("POST")
 	r.HandleFunc("/api/categories/{id}", categoryHandler.GetCategory).Methods("GET")
+	r.HandleFunc("/api/categories/{id}", categoryHandler.UpdateCategory).Methods("PUT")
+	r.HandleFunc("/api/categories/{id}", categoryHandler.DeleteCategory).Methods("DELETE")
+
+	// User preference routes
+	r.HandleFunc("/api/user/preferences", userHandler.GetUserPreferences).Methods("GET")
+	r.HandleFunc("/api/user/preferences", userHandler.UpdateUserPreferences).Methods("PUT")
+	r.HandleFunc("/api/user/preferences/debug", userHandler.DebugUserPreferences).Methods("GET")
 
 	// Health check
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {

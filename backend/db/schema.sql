@@ -18,23 +18,15 @@ CREATE TABLE IF NOT EXISTS users (
 -- Categories table
 CREATE TABLE IF NOT EXISTS categories (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
     name VARCHAR(100) NOT NULL,
+    color VARCHAR(7) DEFAULT '#000000',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_category_name (name)
 );
-
--- Insert categories if they don't exist
-INSERT IGNORE INTO `categories` (`id`, `name`, `created_at`, `updated_at`) VALUES
-(1, 'Personal', NOW(), NOW()),
-(2, 'Work', NOW(), NOW()),
-(3, 'Ideas', NOW(), NOW()),
-(4, 'Learning', NOW(), NOW()),
-(5, 'Health', NOW(), NOW()),
-(6, 'Travel', NOW(), NOW()),
-(7, 'Finance', NOW(), NOW()),
-(8, 'Family', NOW(), NOW()),
-(9, 'Other', NOW(), NOW());
 
 -- Journal entries table
 CREATE TABLE IF NOT EXISTS journal_entries (
@@ -79,12 +71,16 @@ CREATE TABLE IF NOT EXISTS journal_entry_tags (
 
 -- User preferences table
 CREATE TABLE IF NOT EXISTS user_preferences (
-    user_id BIGINT UNSIGNED PRIMARY KEY,
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
     theme VARCHAR(20) DEFAULT 'light',
     default_view VARCHAR(20) DEFAULT 'list',
+    date_format VARCHAR(20) DEFAULT 'MM/DD/YYYY',
     email_notifications BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_preferences_per_user (user_id),
+    INDEX idx_user_preferences_deleted_at (deleted_at)
 ); 

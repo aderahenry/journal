@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import {
   Box,
   Paper,
@@ -10,10 +11,12 @@ import {
   Stack,
 } from '@mui/material';
 import { useLoginMutation } from '../store/api';
+import { showNotification } from '../store/slices/notificationSlice';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const [login] = useLoginMutation();
+  const dispatch = useDispatch();
+  const [login, { isLoading }] = useLoginMutation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -21,9 +24,19 @@ const Login: React.FC = () => {
     e.preventDefault();
     try {
       await login({ email, password }).unwrap();
+      dispatch(showNotification({
+        message: 'Login successful!',
+        type: 'success',
+        duration: 3000
+      }));
       navigate('/');
     } catch (error) {
       console.error('Login failed:', error);
+      dispatch(showNotification({
+        message: 'Login failed. Please check your credentials.',
+        type: 'error',
+        duration: 5000
+      }));
     }
   };
 

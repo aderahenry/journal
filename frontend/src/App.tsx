@@ -6,6 +6,7 @@ import { Provider } from 'react-redux';
 import { store } from './store/store';
 import { useAppTheme } from './theme';
 import Layout from './components/Layout';
+import NotificationProvider from './components/NotificationProvider';
 import EntryDetail from './pages/EntryDetail';
 import EntryCreate from './pages/EntryCreate';
 import EntryEdit from './pages/EntryEdit';
@@ -15,6 +16,7 @@ import Register from './pages/Register';
 import PrivateRoute from './components/PrivateRoute';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
+import Categories from './pages/Categories';
 
 // App container that sets up Redux provider
 const App: React.FC = () => {
@@ -50,8 +52,10 @@ const AppWithTheme: React.FC = () => {
             <Route path="entries/:id/edit" element={<EntryEdit />} />
             <Route path="stats" element={<Stats />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="categories" element={<Categories />} />
           </Route>
         </Routes>
+        <NotificationProvider />
       </Router>
     </ThemeProvider>
   );

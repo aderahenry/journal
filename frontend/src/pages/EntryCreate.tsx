@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import {
   Box,
   Paper,
@@ -16,6 +17,7 @@ import {
   Grid,
 } from '@mui/material';
 import { useCreateEntryMutation, useGetCategoriesQuery } from '../store/api';
+import { showNotification } from '../store/slices/notificationSlice';
 import type { Tag } from '../store/api';
 
 const MOODS = ['Happy', 'Sad', 'Angry', 'Excited', 'Peaceful', 'Neutral', 'Anxious', 'Grateful', 'Frustrated', 'Hopeful'];
@@ -23,7 +25,9 @@ const CATEGORIES = ['Personal', 'Work', 'Ideas', 'Learning', 'Health', 'Travel',
 
 const EntryCreate: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [createEntry] = useCreateEntryMutation();
+  const { data: categories, isLoading: isLoadingCategories } = useGetCategoriesQuery();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [mood, setMood] = useState('');
@@ -41,9 +45,20 @@ const EntryCreate: React.FC = () => {
         categoryId,
         tags: tags.map(tag => tag.name),
       }).unwrap();
+      
+      dispatch(showNotification({
+        message: 'Entry created successfully!',
+        type: 'success'
+      }));
+      
       navigate('/');
     } catch (error) {
       console.error('Failed to create entry:', error);
+      
+      dispatch(showNotification({
+        message: 'Failed to create entry. Please try again.',
+        type: 'error'
+      }));
     }
   };
 
@@ -95,13 +110,14 @@ const EntryCreate: React.FC = () => {
                 value={categoryId === null ? '' : categoryId}
                 label="Category"
                 onChange={(e) => setCategoryId(e.target.value === '' ? null : Number(e.target.value))}
+                disabled={isLoadingCategories}
               >
                 <MenuItem value="">
                   <em>None</em>
                 </MenuItem>
-                {CATEGORIES.map((category, index) => (
-                  <MenuItem key={index} value={index + 1}>
-                    {category}
+                {categories?.map((category) => (
+                  <MenuItem key={category.id} value={category.id}>
+                    {category.name}
                   </MenuItem>
                 ))}
               </Select>

@@ -44,6 +44,13 @@ type TagTypes = 'Entry' | 'Stats' | 'Category';
 
 type Api = ReturnType<typeof createApi>;
 
+// Define a UserPreferences interface that matches the backend's UserPreferences model
+export interface UserPreferencesDTO {
+  theme: string;
+  defaultView: string;
+  emailNotifications: boolean;
+}
+
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({
@@ -77,6 +84,12 @@ export const api = createApi({
         method: 'POST',
         body: credentials,
       }),
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setToken(data.token));
+        } catch {}
+      },
     }),
     getEntries: builder.query<{ entries: Entry[]; total: number }, void>({
       query: () => 'entries',
@@ -122,6 +135,39 @@ export const api = createApi({
       query: () => 'categories',
       providesTags: [{ type: 'Category' }],
     }),
+    createCategory: builder.mutation<Category, Partial<Category>>({
+      query: (category) => ({
+        url: 'categories',
+        method: 'POST',
+        body: category,
+      }),
+      invalidatesTags: [{ type: 'Category' }],
+    }),
+    updateCategory: builder.mutation<Category, { id: number; category: Partial<Category> }>({
+      query: ({ id, category }) => ({
+        url: `categories/${id}`,
+        method: 'PUT',
+        body: category,
+      }),
+      invalidatesTags: [{ type: 'Category' }],
+    }),
+    deleteCategory: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `categories/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'Category' }, { type: 'Stats' }, { type: 'Entry' }],
+    }),
+    getUserPreferences: builder.query<UserPreferencesDTO, void>({
+      query: () => 'user/preferences',
+    }),
+    updateUserPreferences: builder.mutation<UserPreferencesDTO, Partial<UserPreferencesDTO>>({
+      query: (preferences) => ({
+        url: 'user/preferences',
+        method: 'PUT',
+        body: preferences,
+      }),
+    }),
   }),
 });
 
@@ -135,4 +181,9 @@ export const {
   useDeleteEntryMutation,
   useGetEntryStatsQuery,
   useGetCategoriesQuery,
+  useCreateCategoryMutation,
+  useUpdateCategoryMutation,
+  useDeleteCategoryMutation,
+  useGetUserPreferencesQuery,
+  useUpdateUserPreferencesMutation,
 } = api; 

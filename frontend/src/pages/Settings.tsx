@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Box,
@@ -14,8 +14,7 @@ import {
   Stack,
   Button,
   Divider,
-  Alert,
-  Snackbar,
+  CircularProgress,
 } from '@mui/material';
 import { 
   DarkMode as DarkModeIcon, 
@@ -23,7 +22,8 @@ import {
   ViewList as ViewListIcon,
   DateRange as DateRangeIcon,
   LocalOffer as TagIcon,
-  Save as SaveIcon
+  Save as SaveIcon,
+  Sync as SyncIcon,
 } from '@mui/icons-material';
 import { RootState } from '../store/store';
 import { 
@@ -31,27 +31,120 @@ import {
   setNotifications, 
   setDefaultView, 
   setDateFormat,
-  setTagsToShow
+  setTagsToShow,
+  fetchPreferences,
+  savePreferences
 } from '../store/slices/preferencesSlice';
+import { showNotification } from '../store/slices/notificationSlice';
 
 const Settings: React.FC = () => {
   const dispatch = useDispatch();
   const preferences = useSelector((state: RootState) => state.preferences);
-  const [showSaveAlert, setShowSaveAlert] = React.useState(false);
+
+  // Fetch preferences from backend when component mounts
+  useEffect(() => {
+    // Fetch from backend with direct fetch for more reliable operation
+    fetch('http://localhost:3000/api/user/preferences', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch preferences');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Update preferences in Redux store
+        if (data.theme) {
+          const isDarkMode = data.theme === 'dark';
+          // Only update if different from current state
+          if (isDarkMode !== preferences.darkMode) {
+            dispatch(toggleDarkMode());
+          }
+        }
+        
+        if (data.defaultView) {
+          dispatch(setDefaultView(data.defaultView));
+        }
+        
+        if (data.dateFormat) {
+          dispatch(setDateFormat(data.dateFormat));
+        }
+        
+        if (data.emailNotifications !== undefined) {
+          dispatch(setNotifications(data.emailNotifications));
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching preferences:', error);
+      });
+  }, [dispatch]);
 
   const handleSave = () => {
-    setShowSaveAlert(true);
+    // Save preferences to both localStorage and backend
+    const backendPrefs = {
+      theme: preferences.darkMode ? 'dark' : 'light',
+      defaultView: preferences.defaultView,
+      dateFormat: preferences.dateFormat,
+      emailNotifications: preferences.notificationsEnabled
+    };
+
+    // Save to backend with direct fetch for more reliable operation
+    fetch('http://localhost:3000/api/user/preferences', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify(backendPrefs)
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to save preferences');
+        }
+        return response.json();
+      })
+      .then(() => {
+        dispatch(showNotification({
+          message: 'Your preferences have been saved!',
+          type: 'success',
+          duration: 3000
+        }));
+      })
+      .catch(error => {
+        dispatch(showNotification({
+          message: error.message || 'Failed to save preferences',
+          type: 'error',
+          duration: 5000
+        }));
+      });
   };
 
   return (
     <Box sx={{ p: 3 }}>
       <Paper sx={{ p: 3 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Settings
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h4" component="h1">
+            Settings
+          </Typography>
+          {preferences.isSyncing && (
+            <CircularProgress size={24} />
+          )}
+        </Box>
+        
         <Typography variant="body1" color="text.secondary" paragraph>
           Customize your journal app experience by updating your preferences below.
         </Typography>
+
+        {preferences.error && (
+          <Typography color="error" sx={{ my: 2 }}>
+            {preferences.error}
+          </Typography>
+        )}
 
         <Divider sx={{ my: 3 }} />
 
@@ -151,26 +244,27 @@ const Settings: React.FC = () => {
             </Box>
           </Box>
 
-          <Button 
-            variant="contained" 
-            color="primary" 
-            startIcon={<SaveIcon />}
-            onClick={handleSave}
-          >
-            Save Preferences
-          </Button>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              startIcon={<SaveIcon />}
+              onClick={handleSave}
+              disabled={preferences.isSyncing}
+            >
+              Save Preferences
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<SyncIcon />}
+              onClick={() => dispatch(fetchPreferences())}
+              disabled={preferences.isSyncing}
+            >
+              Sync with Server
+            </Button>
+          </Box>
         </Stack>
       </Paper>
-
-      <Snackbar
-        open={showSaveAlert}
-        autoHideDuration={3000}
-        onClose={() => setShowSaveAlert(false)}
-      >
-        <Alert onClose={() => setShowSaveAlert(false)} severity="success">
-          Your preferences have been saved!
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };

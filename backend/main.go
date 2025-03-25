@@ -32,7 +32,7 @@ func main() {
 	categoryService := services.NewCategoryService(database)
 
 	// Setup router
-	r := router.SetupRouter(authService, journalService, categoryService)
+	r := router.SetupRouter(authService, journalService, categoryService, userService)
 
 	// Configure CORS
 	c := cors.New(cors.Options{

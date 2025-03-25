@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import {
   Box,
   Paper,
@@ -10,10 +11,12 @@ import {
   Stack,
 } from '@mui/material';
 import { useRegisterMutation } from '../store/api';
+import { showNotification } from '../store/slices/notificationSlice';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
-  const [register] = useRegisterMutation();
+  const dispatch = useDispatch();
+  const [register, { isLoading }] = useRegisterMutation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -21,13 +24,26 @@ const Register: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
+      dispatch(showNotification({
+        message: 'Passwords do not match',
+        type: 'error'
+      }));
       return;
     }
     try {
       await register({ email, password }).unwrap();
-      navigate('/login');
+      dispatch(showNotification({
+        message: 'Registration successful! Welcome to the Journal App.',
+        type: 'success'
+      }));
+      // Navigate to dashboard instead of login since user is now automatically signed in
+      navigate('/');
     } catch (error) {
       console.error('Registration failed:', error);
+      dispatch(showNotification({
+        message: 'Registration failed. Please try again.',
+        type: 'error'
+      }));
     }
   };
 

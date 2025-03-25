@@ -112,18 +112,60 @@ func (s *UserService) UpdateUser(id uint, firstName, lastName string) (*models.U
 	}, nil
 }
 
-func (s *UserService) UpdateUserPreferences(id uint, theme, defaultView string, emailNotifications bool) error {
-	return s.db.Model(&models.UserPreferences{}).Where("user_id = ?", id).Updates(map[string]interface{}{
-		"theme":               theme,
-		"default_view":        defaultView,
-		"email_notifications": emailNotifications,
-	}).Error
+func (s *UserService) UpdateUserPreferences(userID uint, prefsData models.UserPreferences) (*models.UserPreferences, error) {
+	// Get existing preferences
+	var prefs models.UserPreferences
+	result := s.db.Where("user_id = ?", userID).First(&prefs)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			// Create preferences if not found
+			prefs = models.UserPreferences{
+				UserID:             userID,
+				Theme:              prefsData.Theme,
+				DefaultView:        prefsData.DefaultView,
+				DateFormat:         prefsData.DateFormat,
+				EmailNotifications: prefsData.EmailNotifications,
+			}
+			if err := s.db.Create(&prefs).Error; err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, result.Error
+		}
+	} else {
+		// Update existing preferences
+		prefs.Theme = prefsData.Theme
+		prefs.DefaultView = prefsData.DefaultView
+		prefs.DateFormat = prefsData.DateFormat
+		prefs.EmailNotifications = prefsData.EmailNotifications
+
+		if err := s.db.Save(&prefs).Error; err != nil {
+			return nil, err
+		}
+	}
+
+	return &prefs, nil
 }
 
-func (s *UserService) GetUserPreferences(id uint) (*models.UserPreferences, error) {
-	var preferences models.UserPreferences
-	if err := s.db.Where("user_id = ?", id).First(&preferences).Error; err != nil {
+func (s *UserService) GetUserPreferences(userID uint) (*models.UserPreferences, error) {
+	var prefs models.UserPreferences
+	if err := s.db.Where("user_id = ?", userID).First(&prefs).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// Create default preferences if none exist
+			prefs = models.UserPreferences{
+				UserID:             userID,
+				Theme:              "light",
+				DefaultView:        "list",
+				DateFormat:         "MM/DD/YYYY",
+				EmailNotifications: false,
+			}
+			if err := s.db.Create(&prefs).Error; err != nil {
+				return nil, err
+			}
+			return &prefs, nil
+		}
 		return nil, err
 	}
-	return &preferences, nil
+	return &prefs, nil
 }

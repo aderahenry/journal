@@ -22,6 +22,7 @@ import {
   BarChart as BarChartIcon,
   Logout as LogoutIcon,
   Settings,
+  Category as CategoryIcon,
 } from '@mui/icons-material';
 import { useDispatch } from 'react-redux';
 import { clearToken } from '../store/slices/authSlice';
@@ -60,6 +61,7 @@ const Layout: React.FC = () => {
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
     { text: 'New Entry', icon: <EditIcon />, path: '/entries/new' },
+    { text: 'Categories', icon: <CategoryIcon />, path: '/categories' },
     { text: 'Statistics', icon: <BarChartIcon />, path: '/stats' },
     { text: 'Settings', icon: <Settings />, path: '/settings' },
   ];

@@ -23,6 +23,7 @@ type UserPreferences struct {
 	UserID             uint   `gorm:"uniqueIndex"`
 	Theme              string `gorm:"default:'light'"`
 	DefaultView        string `gorm:"default:'list'"`
+	DateFormat         string `gorm:"default:'MM/DD/YYYY'"`
 	EmailNotifications bool   `gorm:"default:false"`
 }
 
@@ -71,6 +72,13 @@ type UserDTO struct {
 	LastName  string    `json:"lastName"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+type UserPreferencesDTO struct {
+	Theme              string `json:"theme"`
+	DefaultView        string `json:"defaultView"`
+	DateFormat         string `json:"dateFormat"`
+	EmailNotifications bool   `json:"emailNotifications"`
 }
 
 type JournalEntryDTO struct {
