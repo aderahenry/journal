@@ -1770,6 +1770,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-calendar-heatmap@npm:^1.9.0":
+  version: 1.9.0
+  resolution: "@types/react-calendar-heatmap@npm:1.9.0"
+  dependencies:
+    "@types/react": "npm:*"
+  checksum: 10c0/35eba62bf4092876f3e019867a620b17462519c9cd20f215bb366cf81524164ed9b948108978e27c01e14bcad7695a85856d490aa9a666519da31bef195a5ad5
+  languageName: node
+  linkType: hard
+
 "@types/react-dom@npm:^19.0.4":
   version: 19.0.4
   resolution: "@types/react-dom@npm:19.0.4"
@@ -3904,6 +3913,7 @@ __metadata:
     "@testing-library/user-event": "npm:^14.6.1"
     "@types/node": "npm:^22.13.13"
     "@types/react": "npm:^19.0.12"
+    "@types/react-calendar-heatmap": "npm:^1.9.0"
     "@types/react-dom": "npm:^19.0.4"
     "@types/react-redux": "npm:^7.1.34"
     "@types/react-router-dom": "npm:^5.3.3"
@@ -3921,6 +3931,7 @@ __metadata:
     jsdom: "npm:^26.0.0"
     msw: "npm:^2.7.3"
     react: "npm:^18.2.0"
+    react-calendar-heatmap: "npm:^1.10.0"
     react-dom: "npm:^18.2.0"
     react-redux: "npm:^9.1.0"
     react-router-dom: "npm:^6.22.1"
@@ -4957,6 +4968,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"memoize-one@npm:^5.0.0":
+  version: 5.2.1
+  resolution: "memoize-one@npm:5.2.1"
+  checksum: 10c0/fd22dbe9a978a2b4f30d6a491fc02fb90792432ad0dab840dc96c1734d2bd7c9cdeb6a26130ec60507eb43230559523615873168bcbe8fafab221c30b11d54c1
+  languageName: node
+  linkType: hard
+
 "merge-stream@npm:^2.0.0":
   version: 2.0.0
   resolution: "merge-stream@npm:2.0.0"
@@ -5663,6 +5681,18 @@ __metadata:
   version: 1.2.3
   resolution: "queue-microtask@npm:1.2.3"
   checksum: 10c0/900a93d3cdae3acd7d16f642c29a642aea32c2026446151f0778c62ac089d4b8e6c986811076e1ae180a694cedf077d453a11b58ff0a865629a4f82ab558e102
+  languageName: node
+  linkType: hard
+
+"react-calendar-heatmap@npm:^1.10.0":
+  version: 1.10.0
+  resolution: "react-calendar-heatmap@npm:1.10.0"
+  dependencies:
+    memoize-one: "npm:^5.0.0"
+    prop-types: "npm:^15.6.2"
+  peerDependencies:
+    react: ">=0.14.0"
+  checksum: 10c0/b949c555f313ca6b22110d1929a2e38bc5736f6619c01a731838251ec6ac6bd2e8018db2f2658b43538e7dd38951d135c374f2854cc3962764cbaa1e15080d05
   languageName: node
   linkType: hard
 
