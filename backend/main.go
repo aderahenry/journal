@@ -4,8 +4,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"journal/db"
+	"journal/handlers"
+	"journal/internal/middleware"
+	"journal/pkg/redis"
 	"journal/router"
 	"journal/services"
 
@@ -19,6 +23,17 @@ func main() {
 		log.Printf("Warning: .env file not found")
 	}
 
+	// Initialize Redis client
+	redisClient, err := redis.NewClient(
+		os.Getenv("REDIS_ADDR"),
+		os.Getenv("REDIS_PASSWORD"),
+		0,
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to Redis: %v", err)
+	}
+	defer redisClient.Close()
+
 	// Initialize database connection
 	database, err := db.InitDB()
 	if err != nil {
@@ -31,8 +46,37 @@ func main() {
 	authService := services.NewAuthService(userService)
 	categoryService := services.NewCategoryService(database)
 
+	// Initialize handler
+	authHandler := handlers.NewAuthHandler(authService)
+
 	// Setup router
 	r := router.SetupRouter(authService, journalService, categoryService, userService)
+
+	// Configure rate limiting for auth routes
+	loginRateLimitConfig := middleware.RateLimitConfig{
+		Tokens:     3,              // 3 initial attempts
+		RefillRate: 1.0 / 60.0,     // 1 attempt per minute (1/60 tokens per second)
+		RefillTime: 24 * time.Hour, // Bucket expires after 24 hours
+	}
+
+	registerRateLimitConfig := middleware.RateLimitConfig{
+		Tokens:     5,               // 5 attempts
+		RefillRate: 0.2,             // 1 attempt every 5 seconds
+		RefillTime: 5 * time.Minute, // Bucket expires after 5 minutes
+	}
+
+	// Apply rate limiting to auth routes
+	authRouter := r.PathPrefix("/api/auth").Subrouter()
+
+	// Apply specific rate limiting to login route
+	loginRouter := authRouter.PathPrefix("/login").Subrouter()
+	loginRouter.Use(middleware.RateLimit(redisClient, loginRateLimitConfig))
+	loginRouter.HandleFunc("", authHandler.Login).Methods("POST")
+
+	// Apply default rate limiting to register route
+	registerRouter := authRouter.PathPrefix("/register").Subrouter()
+	registerRouter.Use(middleware.RateLimit(redisClient, registerRateLimitConfig))
+	registerRouter.HandleFunc("", authHandler.Register).Methods("POST")
 
 	// Configure CORS
 	c := cors.New(cors.Options{

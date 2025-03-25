@@ -216,6 +216,21 @@ The Journal application follows a modern three-tier architecture:
    - Row-level security in database queries
    - Middleware validation on all protected routes
 
+6. **Rate Limiting**
+   - Redis-based token bucket algorithm
+   - Separate limits for login and registration
+   - Login endpoint:
+     - 3 initial attempts
+     - 1 attempt per minute after initial attempts
+     - 24-hour rate limit window
+   - Registration endpoint:
+     - 5 attempts
+     - 1 attempt every 5 seconds
+     - 5-minute rate limit window
+   - IP-based tracking
+   - Automatic retry-after headers
+   - Graceful failure handling
+
 ### Potential Scaling Challenges and Solutions
 
 #### Scaling to Support 1M+ Users
@@ -456,6 +471,47 @@ The Journal application follows a modern three-tier architecture:
 - (-) Token revocation is more challenging
 - (-) Need to handle token refresh flow
 - (-) Increased token size with more claims
+
+### 6. Rate Limiting Implementation
+
+**Problem**: Protecting authentication endpoints from brute force attacks and abuse.
+
+**Options Considered**:
+1. **In-Memory Rate Limiting**: Simple but not distributed
+2. **Database-based Rate Limiting**: Persistent but high latency
+3. **Redis with Token Bucket**: Distributed and performant
+4. **Third-party Rate Limiting Service**: Managed but additional cost
+
+**Chosen Approach**: Redis with Token Bucket Algorithm
+
+**Rationale**:
+- Distributed rate limiting across multiple servers
+- Atomic operations via LUA scripts
+- Low latency and high throughput
+- Configurable per endpoint
+- Built-in expiration for automatic cleanup
+
+**Implementation Details**:
+- Login endpoint:
+  - 3 initial attempts
+  - 1 attempt per minute after initial attempts
+  - 24-hour rate limit window
+- Registration endpoint:
+  - 5 attempts
+  - 1 attempt every 5 seconds
+  - 5-minute rate limit window
+- IP-based tracking
+- Automatic retry-after headers
+- Graceful failure handling
+
+**Trade-offs**:
+- (+) Distributed and scalable
+- (+) Atomic operations prevent race conditions
+- (+) Configurable per endpoint
+- (+) Automatic cleanup via Redis expiration
+- (-) Additional infrastructure dependency
+- (-) Need to handle Redis connection failures
+- (-) Memory usage for rate limit tracking
 
 ## License
 

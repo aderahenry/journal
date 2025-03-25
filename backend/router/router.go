@@ -19,7 +19,6 @@ func SetupRouter(
 	r := mux.NewRouter()
 
 	// Initialize handlers
-	authHandler := handlers.NewAuthHandler(authService)
 	journalHandler := handlers.NewJournalHandler(journalService)
 	categoryHandler := handlers.NewCategoryHandler(categoryService)
 	userHandler := handlers.NewUserHandler(userService)
@@ -27,10 +26,6 @@ func SetupRouter(
 	// Apply middleware
 	r.Use(middleware.CORSMiddleware())
 	r.Use(middleware.AuthMiddleware(authService))
-
-	// Auth routes
-	r.HandleFunc("/api/auth/login", authHandler.Login).Methods("POST")
-	r.HandleFunc("/api/auth/register", authHandler.Register).Methods("POST")
 
 	// Journal routes
 	r.HandleFunc("/api/entries", journalHandler.CreateEntry).Methods("POST")
