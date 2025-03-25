@@ -1,5 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Paper, Typography, useTheme, Popper } from '@mui/material';
+import { 
+  Box, 
+  Paper, 
+  Typography, 
+  useTheme, 
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  List,
+  ListItem,
+  ListItemText,
+  Button,
+  Divider 
+} from '@mui/material';
 import CalendarHeatmap from 'react-calendar-heatmap';
 import 'react-calendar-heatmap/dist/styles.css';
 import { useNavigate } from 'react-router-dom';
@@ -30,6 +43,11 @@ const CalendarView: React.FC<CalendarViewProps> = ({ entries }) => {
     position: { top: 0, left: 0 },
     content: '',
   });
+  
+  // Add state for the entries dialog
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedEntries, setSelectedEntries] = useState<Entry[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>('');
   
   // Get date range for the calendar (last 12 months)
   const endDate = new Date();
@@ -83,10 +101,17 @@ const CalendarView: React.FC<CalendarViewProps> = ({ entries }) => {
       // If only one entry, go directly to it
       navigate(`/entries/${value.entries[0].id}`);
     } else {
-      // TODO: If multiple entries, we could show a modal or navigate to a filtered list
-      // For now, navigate to the first one
-      navigate(`/entries/${value.entries[0].id}`);
+      // Show dialog with all entries for this date
+      setSelectedEntries(value.entries);
+      setSelectedDate(value.date);
+      setDialogOpen(true);
     }
+  };
+  
+  // Handle selecting an entry from the dialog
+  const handleEntrySelect = (entryId: number) => {
+    navigate(`/entries/${entryId}`);
+    setDialogOpen(false);
   };
   
   // Handle mouse over event for tooltip
@@ -183,6 +208,47 @@ const CalendarView: React.FC<CalendarViewProps> = ({ entries }) => {
           </div>
         )}
       </Box>
+      
+      {/* Dialog to show all entries for a selected date */}
+      <Dialog 
+        open={dialogOpen} 
+        onClose={() => setDialogOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>
+          Entries for {formatDate(selectedDate)}
+        </DialogTitle>
+        <DialogContent>
+          <List>
+            {selectedEntries.map((entry, index) => (
+              <React.Fragment key={entry.id}>
+                <ListItem button onClick={() => handleEntrySelect(entry.id)}>
+                  <ListItemText 
+                    primary={entry.title}
+                    secondary={
+                      <>
+                        <Typography variant="body2" color="text.secondary">
+                          {entry.wordCount} words • {entry.mood || 'No mood'}
+                        </Typography>
+                        <Typography variant="body2" sx={{ mt: 1, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                          {entry.content.substring(0, 150)}
+                          {entry.content.length > 150 ? '...' : ''}
+                        </Typography>
+                      </>
+                    }
+                    secondaryTypographyProps={{ component: 'div' }}
+                  />
+                </ListItem>
+                {index < selectedEntries.length - 1 && <Divider />}
+              </React.Fragment>
+            ))}
+          </List>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+            <Button onClick={() => setDialogOpen(false)}>Close</Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </Paper>
   );
 };
