@@ -1,8 +1,11 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme, ThemeOptions } from '@mui/material/styles';
+import { useSelector } from 'react-redux';
+import { RootState } from './store/store';
 
-const theme = createTheme({
+// Define theme options for light and dark modes
+const getThemeOptions = (mode: 'light' | 'dark'): ThemeOptions => ({
   palette: {
-    mode: 'light',
+    mode,
     primary: {
       main: '#1976d2',
     },
@@ -10,8 +13,8 @@ const theme = createTheme({
       main: '#dc004e',
     },
     background: {
-      default: '#f9fafb',
-      paper: '#ffffff',
+      default: mode === 'light' ? '#f9fafb' : '#121212',
+      paper: mode === 'light' ? '#ffffff' : '#1e1e1e',
     },
   },
   typography: {
@@ -75,4 +78,13 @@ const theme = createTheme({
   },
 });
 
-export default theme; 
+// Create a default light theme
+const defaultTheme = createTheme(getThemeOptions('light'));
+
+// Hook to get theme based on user preferences
+export const useAppTheme = () => {
+  const { darkMode } = useSelector((state: RootState) => state.preferences);
+  return createTheme(getThemeOptions(darkMode ? 'dark' : 'light'));
+};
+
+export default defaultTheme; 

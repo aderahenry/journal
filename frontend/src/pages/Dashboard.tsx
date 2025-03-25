@@ -26,6 +26,7 @@ import {
 } from '@mui/icons-material';
 import { useGetEntriesQuery, useGetEntryStatsQuery } from '../store/api';
 import type { Entry } from '../store/api';
+import { formatDate } from '../utils/dateFormat';
 
 const StatCard: React.FC<{
   title: string;
@@ -124,7 +125,7 @@ const Dashboard: React.FC = () => {
                       secondary={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Typography variant="body2" color="text.secondary">
-                            {new Date(entry.createdAt).toLocaleDateString()}
+                            {formatDate(entry.createdAt)}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
                             •

@@ -13,8 +13,35 @@ yarn install
 # Create .gitignore if it doesn't exist
 if [ ! -f .gitignore ]; then
   cat > .gitignore << EOL
-# Dependencies
-.pnp.*
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Env file
+*.env
+
+# Yarn
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
@@ -22,23 +49,9 @@ if [ ! -f .gitignore ]; then
 !.yarn/sdks
 !.yarn/versions
 
-# Testing
-coverage
-
-# Production
-dist
-build
-
-# Misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# enable zero-installs
+!.yarn/cache
+.pnp.*
 EOL
 fi
 

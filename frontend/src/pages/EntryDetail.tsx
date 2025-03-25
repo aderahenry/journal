@@ -12,6 +12,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useGetEntryQuery, useDeleteEntryMutation } from '../store/api';
 import type { Entry, Tag } from '../store/api';
+import { formatDate } from '../utils/dateFormat';
 
 const EntryDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -66,7 +67,7 @@ const EntryDetail: React.FC = () => {
         </Box>
         <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
           <Typography variant="subtitle1" color="text.secondary">
-            {new Date(entry.createdAt).toLocaleDateString()}
+            {formatDate(entry.createdAt, true)}
           </Typography>
           {entry.mood && (
             <Chip

@@ -21,6 +21,7 @@ import {
   Edit as EditIcon,
   BarChart as BarChartIcon,
   Logout as LogoutIcon,
+  Settings,
 } from '@mui/icons-material';
 import { useAuth } from '../hooks/useAuth';
 
@@ -37,9 +38,11 @@ const Layout: React.FC = () => {
   };
 
   const menuItems = [
-    { text: 'Entries', icon: <EditIcon />, path: '/entries' },
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+    { text: 'New Entry', icon: <EditIcon />, path: '/entries/new' },
+    
     { text: 'Statistics', icon: <BarChartIcon />, path: '/stats' },
-    { text: 'Settings', icon: <DashboardIcon />, path: '/settings' },
+    { text: 'Settings', icon: <Settings />, path: '/settings' },
   ];
 
   const drawer = (
