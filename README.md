@@ -67,7 +67,7 @@ journal/
          ▼                           ▼                            ▼
 ┌───────────────────┐      ┌─────────────────────┐      ┌───────────────────┐
 │                   │      │                     │      │                   │
-│  Client Caching   │      │    Redis (Future)   │      │   Backup System   │
+│  Client Caching   │      │    Redis            │      │   Backup System   │
 │  ---------------  │      │  ---------------    │      │  ---------------  │
 │  - Local Storage  │      │  - Session Store    │      │  - Scheduled      │
 │  - Redux Cache    │      │  - Rate Limiting    │      │    Snapshots      │
@@ -188,7 +188,7 @@ The Journal application follows a modern three-tier architecture:
    - Secure HttpOnly cookies
    - CSRF protection with tokens
    - Token invalidation on logout
-   - IP address binding (future)
+   - IP address binding
 
 2. **Password Security**
    - Bcrypt hashing with salt
@@ -477,6 +477,7 @@ The Journal application follows a modern three-tier architecture:
 **Problem**: Protecting authentication endpoints from brute force attacks and abuse.
 
 **Options Considered**:
+
 1. **In-Memory Rate Limiting**: Simple but not distributed
 2. **Database-based Rate Limiting**: Persistent but high latency
 3. **Redis with Token Bucket**: Distributed and performant
@@ -485,6 +486,7 @@ The Journal application follows a modern three-tier architecture:
 **Chosen Approach**: Redis with Token Bucket Algorithm
 
 **Rationale**:
+
 - Distributed rate limiting across multiple servers
 - Atomic operations via LUA scripts
 - Low latency and high throughput
@@ -492,6 +494,7 @@ The Journal application follows a modern three-tier architecture:
 - Built-in expiration for automatic cleanup
 
 **Implementation Details**:
+
 - Login endpoint:
   - 3 initial attempts
   - 1 attempt per minute after initial attempts
@@ -505,6 +508,7 @@ The Journal application follows a modern three-tier architecture:
 - Graceful failure handling
 
 **Trade-offs**:
+
 - (+) Distributed and scalable
 - (+) Atomic operations prevent race conditions
 - (+) Configurable per endpoint

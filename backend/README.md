@@ -38,14 +38,6 @@ CREATE DATABASE journal_db;
 EXIT;
 ```
 
-2. Run database schema initialization:
-
-The application will automatically create the necessary tables when it runs for the first time, but you need to create categories manually using the provided script:
-
-```bash
-mysql -u root -p"your_password" journal_db < scripts/create_categories.sql
-```
-
 ### 4. Configuration
 
 Copy the example environment file and update it with your configuration:
