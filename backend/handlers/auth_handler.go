@@ -30,7 +30,8 @@ type RegisterRequest struct {
 }
 
 type AuthResponse struct {
-	Token string `json:"token"`
+	Token   string `json:"token"`
+	Message string `json:"message"`
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -52,7 +53,10 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(AuthResponse{Token: token})
+	json.NewEncoder(w).Encode(AuthResponse{
+		Token:   token,
+		Message: "Successfully logged in",
+	})
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -74,5 +78,8 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(AuthResponse{Token: token})
+	json.NewEncoder(w).Encode(AuthResponse{
+		Token:   token,
+		Message: "Successfully registered",
+	})
 }

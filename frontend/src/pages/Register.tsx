@@ -1,51 +1,60 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
 import {
   Box,
   Paper,
-  TextField,
   Button,
   Typography,
   Link,
   Stack,
 } from '@mui/material';
+import ShowPassword from '@mui/icons-material/Visibility'
+import HidePassword from '@mui/icons-material/VisibilityOff'
+import { FormProvider, useForm, handleSubmit, Input } from 'react-fatless-form'
+import * as yup from 'yup'
+
 import { useRegisterMutation } from '../store/api';
-import { showNotification } from '../store/slices/notificationSlice';
+
+const schema = yup.object().shape({
+  firstName: yup.string().required('First name is required'),
+  lastName: yup.string().required('Last name is required'),
+  email: yup
+    .string()
+    .email('Please enter a valid email')
+    .required('Email is required'),
+  password: yup.string().required('Password is required'),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref('password')], 'Passwords must match')
+    .required('Please confirm your password'),
+})
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const [register, { isLoading }] = useRegisterMutation();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      dispatch(showNotification({
-        message: 'Passwords do not match',
-        type: 'error'
-      }));
-      return;
-    }
-    try {
-      await register({ email, password }).unwrap();
-      dispatch(showNotification({
-        message: 'Registration successful! Welcome to the Journal App.',
-        type: 'success'
-      }));
-      // Navigate to dashboard instead of login since user is now automatically signed in
-      navigate('/');
-    } catch (error) {
-      console.error('Registration failed:', error);
-      dispatch(showNotification({
-        message: 'Registration failed. Please try again.',
-        type: 'error'
-      }));
-    }
-  };
+  const form = useForm({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  })
+
+  const onSubmit = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ): Promise<void> => {
+    event.preventDefault()
+
+    await handleSubmit(form, schema, async values => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { confirmPassword, ...data } = values
+      const response = await register(data).unwrap();
+      if (response) navigate('/');
+
+      return response
+    })
+  }
 
   return (
     <Box
@@ -62,57 +71,60 @@ const Register: React.FC = () => {
         sx={{
           p: 4,
           width: '100%',
-          maxWidth: 400,
+          maxWidth: 500,
         }}
       >
         <Typography variant="h4" component="h1" gutterBottom align="center">
           Sign Up
         </Typography>
-        <form onSubmit={handleSubmit}>
-          <Stack spacing={3}>
-            <TextField
-              label="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              fullWidth
-            />
-            <TextField
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              fullWidth
-            />
-            <TextField
-              label="Confirm Password"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              fullWidth
-              error={password !== confirmPassword}
-              helperText={password !== confirmPassword ? 'Passwords do not match' : ''}
-            />
-            <Button
-              type="submit"
-              variant="contained"
-              size="large"
-              fullWidth
-              disabled={!email || !password || !confirmPassword || password !== confirmPassword}
-            >
-              Sign Up
-            </Button>
-            <Typography align="center">
-              Already have an account?{' '}
-              <Link component={RouterLink} to="/login">
-                Sign In
-              </Link>
-            </Typography>
-          </Stack>
-        </form>
+        <FormProvider form={form}>
+          <form onSubmit={onSubmit}>
+            <Stack direction='row' spacing={1}>
+              <Box width='50%'>
+                <Input type='text' name='firstName' label='First Name' />
+              </Box>
+              <Box width='50%'>
+                <Input type='text' name='lastName' label='Last Name' />
+              </Box>
+            </Stack>
+            <Stack direction='column' spacing={1}>
+              <Input type='text' name='email' label='Email Address' />
+              <Input
+                type='password'
+                name='password'
+                label='Password'
+                showIcon={<ShowPassword />}
+                hideIcon={<HidePassword />}
+              />
+              <Input
+                type='password'
+                name='confirmPassword'
+                label='Confirm Password'
+                showStrengthIndicator={false}
+                showIcon={<ShowPassword />}
+                hideIcon={<HidePassword />}
+                style={{ top: '-17px', marginBottom: '-17px' }}
+              />
+            </Stack>
+            <Stack spacing={3}>
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                fullWidth
+                disabled={isLoading}
+              >
+                Sign Up
+              </Button>
+              <Typography align="center">
+                Already have an account?{' '}
+                <Link component={RouterLink} to="/login">
+                  Sign In
+                </Link>
+              </Typography>
+            </Stack>
+          </form>
+        </FormProvider>
       </Paper>
     </Box>
   );

@@ -55,8 +55,8 @@ export const api = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({
     baseUrl: 'http://localhost:3000/api',
-    prepareHeaders: (headers: Headers, { getState }: { getState: () => RootState }) => {
-      const token = getState().auth.token;
+    prepareHeaders: (headers: Headers, { getState }) => {
+      const token = (getState() as RootState).auth.token;
       if (token) {
         headers.set('authorization', `Bearer ${token}`);
       }
@@ -65,7 +65,7 @@ export const api = createApi({
   }),
   tagTypes: ['Entry', 'Stats', 'Category'] as const,
   endpoints: (builder: EndpointBuilder<ReturnType<typeof fetchBaseQuery>, TagTypes, never>) => ({
-    login: builder.mutation<{ token: string }, { email: string; password: string }>({
+    login: builder.mutation<{ token: string, message: string }, { email: string; password: string }>({
       query: (credentials) => ({
         url: 'auth/login',
         method: 'POST',
@@ -77,8 +77,12 @@ export const api = createApi({
           dispatch(setToken(data.token));
         } catch {}
       },
+      transformErrorResponse: (response: FetchBaseQueryError) => {
+        return { message: (response.data as any).error ?? response.data };
+      },
     }),
-    register: builder.mutation<{ token: string }, { email: string; password: string }>({
+
+    register: builder.mutation<{ token: string, message: string }, { email: string; password: string }>({
       query: (credentials) => ({
         url: 'auth/register',
         method: 'POST',
@@ -90,16 +94,22 @@ export const api = createApi({
           dispatch(setToken(data.token));
         } catch {}
       },
+      transformErrorResponse: (response: FetchBaseQueryError) => {
+        return { message: (response.data as any).error ?? response.data };
+      },
     }),
+
     getEntries: builder.query<{ entries: Entry[]; total: number }, void>({
       query: () => 'entries',
       providesTags: [{ type: 'Entry' }],
     }),
+
     getEntry: builder.query<Entry, number>({
       query: (id: number) => `entries/${id}`,
       providesTags: (result: Entry | undefined, error: FetchBaseQueryError | undefined, id: number) => 
         [{ type: 'Entry' as const, id }],
     }),
+
     createEntry: builder.mutation<Entry, Partial<Entry>>({
       query: (entry: Partial<Entry>) => ({
         url: 'entries',
@@ -108,6 +118,7 @@ export const api = createApi({
       }),
       invalidatesTags: [{ type: 'Entry' }, { type: 'Stats' }],
     }),
+
     updateEntry: builder.mutation<Entry, { id: number; entry: Partial<Entry> }>({
       query: ({ id, entry }: { id: number; entry: Partial<Entry> }) => ({
         url: `entries/${id}`,
@@ -120,6 +131,7 @@ export const api = createApi({
         { type: 'Stats' },
       ],
     }),
+
     deleteEntry: builder.mutation<void, number>({
       query: (id: number) => ({
         url: `entries/${id}`,
@@ -127,14 +139,17 @@ export const api = createApi({
       }),
       invalidatesTags: [{ type: 'Entry' }, { type: 'Stats' }],
     }),
+
     getEntryStats: builder.query<EntryStats, void>({
       query: () => 'entries/stats',
       providesTags: [{ type: 'Stats' }],
     }),
+
     getCategories: builder.query<Category[], void>({
       query: () => 'categories',
       providesTags: [{ type: 'Category' }],
     }),
+
     createCategory: builder.mutation<Category, Partial<Category>>({
       query: (category) => ({
         url: 'categories',
@@ -143,6 +158,7 @@ export const api = createApi({
       }),
       invalidatesTags: [{ type: 'Category' }],
     }),
+
     updateCategory: builder.mutation<Category, { id: number; category: Partial<Category> }>({
       query: ({ id, category }) => ({
         url: `categories/${id}`,
@@ -151,6 +167,7 @@ export const api = createApi({
       }),
       invalidatesTags: [{ type: 'Category' }],
     }),
+
     deleteCategory: builder.mutation<void, number>({
       query: (id) => ({
         url: `categories/${id}`,
@@ -158,9 +175,11 @@ export const api = createApi({
       }),
       invalidatesTags: [{ type: 'Category' }, { type: 'Stats' }, { type: 'Entry' }],
     }),
+
     getUserPreferences: builder.query<UserPreferencesDTO, void>({
       query: () => 'user/preferences',
     }),
+
     updateUserPreferences: builder.mutation<UserPreferencesDTO, Partial<UserPreferencesDTO>>({
       query: (preferences) => ({
         url: 'user/preferences',

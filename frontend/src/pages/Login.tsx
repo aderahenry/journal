@@ -1,44 +1,50 @@
-import React, { useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import React from 'react';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   Box,
   Paper,
-  TextField,
   Button,
   Typography,
   Link,
   Stack,
 } from '@mui/material';
+import ShowPassword from '@mui/icons-material/Visibility'
+import HidePassword from '@mui/icons-material/VisibilityOff'
+import { FormProvider, useForm, handleSubmit, Input } from 'react-fatless-form'
+import * as yup from 'yup'
+
 import { useLoginMutation } from '../store/api';
-import { showNotification } from '../store/slices/notificationSlice';
 
-const Login: React.FC = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+export const schema = yup.object().shape({
+  email: yup
+    .string()
+    .email('Please enter a valid email')
+    .required('Enter your email address'),
+  password: yup.string().required('Your password is required'),
+})
+
+
+export default function Login() {
   const [login, { isLoading }] = useLoginMutation();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const navigate = useNavigate()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await login({ email, password }).unwrap();
-      dispatch(showNotification({
-        message: 'Login successful!',
-        type: 'success',
-        duration: 3000
-      }));
-      navigate('/');
-    } catch (error) {
-      console.error('Login failed:', error);
-      dispatch(showNotification({
-        message: 'Login failed. Please check your credentials.',
-        type: 'error',
-        duration: 5000
-      }));
-    }
-  };
+  const form = useForm({
+    email: '',
+    password: '',
+  })
+
+  const onSubmit = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ): Promise<void> => {
+    event.preventDefault()
+
+    await handleSubmit(form, schema, async values => {
+      const response = await login(values).unwrap()
+      if (response) navigate('/')
+        
+      return response;
+    })
+  }
 
   return (
     <Box
@@ -61,44 +67,30 @@ const Login: React.FC = () => {
         <Typography variant="h4" component="h1" gutterBottom align="center">
           Sign In
         </Typography>
-        <form onSubmit={handleSubmit}>
-          <Stack spacing={3}>
-            <TextField
-              label="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              fullWidth
-            />
-            <TextField
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              fullWidth
-            />
-            <Button
-              type="submit"
-              variant="contained"
-              size="large"
-              fullWidth
-              disabled={!email || !password}
-            >
-              Sign In
-            </Button>
-            <Typography align="center">
-              Don't have an account?{' '}
-              <Link component={RouterLink} to="/register">
-                Sign Up
-              </Link>
-            </Typography>
-          </Stack>
-        </form>
+        <FormProvider form={form}>
+          <form onSubmit={onSubmit}>
+          <Input type='text' name='email' label='Email' />
+          <Input type='password' name='password' label='Password' showStrengthIndicator={false} showIcon={<ShowPassword />} hideIcon={<HidePassword />} />
+            <Stack spacing={3}>
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                fullWidth
+                disabled={isLoading}
+              >
+                Sign In
+              </Button>
+              <Typography align="center">
+                Don't have an account?{' '}
+                <Link component={RouterLink} to="/register">
+                  Sign Up
+                </Link>
+              </Typography>
+            </Stack>
+          </form>
+        </FormProvider>
       </Paper>
     </Box>
   );
 };
-
-export default Login; 
